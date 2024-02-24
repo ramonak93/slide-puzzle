@@ -1,48 +1,60 @@
 // TODO 
-// Randomize puzzles at the beggining
+// change tile movement mechanism (swap row-col instead of GridTemplate)
 // Add Success mechanism
-//  
+// filter out unsolvable combinations 
+// 
 
 // box controls
-let btn3 = document.getElementById("btn3");
-let btn4 = document.getElementById("btn4");
-let buttons = [btn3, btn4];
-let box = document.querySelector(".box");
+const btn3 = document.getElementById("btn3");
+const btn4 = document.getElementById("btn4");
+const minutesLabel = document.querySelector(".minutes");
+const secondsLabel = document.querySelector(".seconds");
+const buttons = [btn3, btn4];
+const box = document.querySelector(".box");
+let timer;
 
 // helpers and features
 let isStarted = false; // used to trigger counter inside move()
 let counter = document.querySelector(".counter"); // tracks number of puzzle moves
 counter.innerText = 0; 
 let puzzleDimension;
+let tilesArray = []; // used to store and manipulate puzzle pieces
  
 // generate default box of 4x4
-generatePuzzles(4);
-let puzzlesArr = box.querySelectorAll("div");
-assignPieces(puzzlesArr);
-play(puzzlesArr);
+document.addEventListener("DOMContentLoaded", (e) => { 
+    clearBox(box);
+    tilesArray = generatePuzzles(4);
+    shufflePieces(tilesArray);
+    for (let i = 0; i < tilesArray.length; i++) {
+        box.appendChild(tilesArray[i]);
+    }
+    play(tilesArray);
+})
 
+// generate layout by button input
 for (let b of buttons) {
     b.addEventListener('click', (e) => {
         // retrieve request Dimension from User
-        let elementValue = document.getElementById(e.target.id).getAttribute("value");
-        let puzzleDimension = Number(elementValue);
-        
-        // reset timer and box content
-        clearBox(box);
-        generatePuzzles(puzzleDimension);
-        puzzlesArr = box.querySelectorAll("div");
+        const elementValue = document.getElementById(e.target.id).getAttribute("value");
+        const puzzleDimension = Number(elementValue);
+        clearBox(box);                                // clear timer and .box content before populatin with new content  
+        tilesArray = generatePuzzles(puzzleDimension);// generate pieces and store in Array
+        shufflePieces(tilesArray);                    // randomly allocate pieces (Otherwise, what's the point?)
 
-        assignPieces(puzzlesArr);
-        play(puzzlesArr);
+        // append randomized pieces to .box
+        for (let k = 0; k < tilesArray.length; k++) {
+            box.appendChild(tilesArray[k]);
+        }
+        
+        play(tilesArray);
     })
 }
 
-// create layout based on puzzle dimension AND fill the .box with pieces
-// TODO
-// separate gridTemplateAreas function and make it dynamic
-function generatePuzzles (dimension) {
+// create layout based on puzzle dimension AND return Array of pieces
+function generatePuzzles(dimension) {
     document.documentElement.style.setProperty("--puzzle-size", String(dimension));
 
+    // assign layout based on the chosen dimension
     if (dimension == 3) {
         document.getElementById("box").style.gridTemplateAreas = '"e01 e02 e03" "e04 e05 e06" "e07 e08 e09"';
     }
@@ -51,54 +63,50 @@ function generatePuzzles (dimension) {
         '"e01 e02 e03 e04" "e05 e06 e07 e08" "e09 e10 e11 e12" "e13 e14 e15 e16"';
     }
 
-    for (let i = 0; i < (dimension * dimension) - 1; i++) {
-        box.appendChild(document.createElement("div"));
+    let pieceArr = [];
+    for (let i = 0; i < (dimension * dimension - 1); i++) {
+        let childDiv = document.createElement("div");
+        childDiv.className = "tile";
+        childDiv.innerText = appendZero(i+1);
+        pieceArr.push(childDiv);
     }
+
+    return pieceArr;
 }
 
-// assign Classes, ID's and InnerText to puzzles
-// TODO
-// must also rearrange randomly
-function assignPieces(array) {
-    for (let j = 0; j < array.length; j++) {
-        array[j].className += "piece";
-        array[j].id = "el-" + appendZero(j+1);
-        array[j].innerText = array[j].id.slice(-2);
+// takes Array of divs and returns them shuffled with ID's
+function shufflePieces(arr) {
+    // create Array of IDs like 'e01', 'e02', 'e03'...'e99'.
+    let idArr = [];
+    for (let j = 0; j < arr.length; j ++) {
+        idArr.push("el-" + appendZero(j+1));
     }
+    // shuffle IDs inside Array
+    idArr.sort(function () {
+        return 0.5 - Math.random();
+    })
+    // shuffle arr of div's
+    arr.sort(function () {
+        return 0.5 - Math.random();
+    })
+    // assign ID's to div's
+    arr.forEach(function (div, index) {
+        div.id = idArr[index];
+    })
 }
-
-// shuffle puzzles randomly a.k.a. Fisher-Yates algorithm
-// taken from https://stackoverflow.com/questions/2450954/how-to-randomize-shuffle-a-javascript-array
-function shuffle(array) {
-    let currentIndex = array.length,  randomIndex;
-  
-    // While there remain elements to shuffle.
-    while (currentIndex > 0) {
-  
-      // Pick a remaining element.
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-  
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex], array[currentIndex]];
-    }
-  
-    return array;
-  }
 
 // add event listener to all puzzles and move if adjacent free slot exists
-function play (elms) {
+function play(elms) {
     let dimension = Math.sqrt(elms.length + 1);
     for (let item of elms) {
         item.addEventListener('click', (e) => {
             let element = document.getElementById(e.target.id);
-            if (findDirection(element, dimension) != null) {            // check if adjacent free slot exists
+            if (findDirection(element, dimension) != null) {    // check if adjacent free slot exists
                 element.id = findDirection(element, dimension); // move element to adjacent free slot
                 counter.innerText++;
                 if (isStarted == false) {
                     isStarted = true;
-                    setInterval(setTime, 1000);
+                    startTimer();
                 }
             }
         })
@@ -132,23 +140,17 @@ function findDirection(element, dimension) {
     return null;
 }
 
-// set timer once a puzzle is moved()
-var minutesLabel = document.querySelector(".minutes");
-var secondsLabel = document.querySelector(".seconds");
-var totalSeconds = 0;
-function setTime() {
-    ++totalSeconds;
-    secondsLabel.innerText = pad(totalSeconds % 60);
-    minutesLabel.innerText = pad(parseInt(totalSeconds / 60));
+// updates count up timer
+function startTimer() {
+    timer = setInterval(() => {
+        timer++;
+        updateTimer();        
+    }, 1000)
 }
 
-function pad(val) {
-    let valString = val + "";
-    if (valString.length < 2) {
-        return "0" + valString;
-      } else {
-        return valString;
-      }
+function updateTimer() {
+    secondsLabel.innerText = appendZero(parseInt(timer % 1000));
+    minutesLabel.innerText = appendZero(parseInt(timer / 60)); 
 }
 
 // used for string formatting so that all ID's have 2 digits at the end
@@ -161,5 +163,8 @@ function appendZero (int) {
 // reset timer
 function clearBox (box) {
     counter.innerText = 0;
+    timer = 0;
+    updateTimer();
+    clearInterval(timer);
     box.innerText = '';
 }
