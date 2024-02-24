@@ -1,0 +1,122 @@
+:root {
+    --piece-size: 100px;
+    --puzzle-size: 3;
+    font-size: 36px;
+}
+
+.menu {
+    display: flex;
+    justify-content: center;
+
+    button {
+        width: 80px;
+        margin: 0px 20px;
+    }
+}
+
+#box {
+    background-color: antiquewhite;
+    box-sizing: content-box;
+    border: 1px solid black;
+    display: grid;
+    gap: 2px;
+    grid-template-columns: repeat(var(--puzzle-size), 1fr);
+    grid-template-rows: repeat(var(--puzzle-size), 1fr);
+    margin: 100px auto;
+    // height: calc(var(--piece-size) * var(--puzzle-size));
+    width: calc(var(--piece-size) * var(--puzzle-size) + 2px * (var(--puzzle-size) + 1 ) + 2px);
+
+    .piece {
+        background-color: burlywood;
+        box-sizing: border-box;
+        display: block;
+        height: var(--piece-size);
+        width: var(--piece-size);
+        border: 1px dashed red;
+        transform: translate(1px, 1px);
+    }
+}
+.stripe {
+    display: flex;
+    justify-content: space-evenly;
+
+    .score, .timer {
+        font-size: 0.5rem;
+        text-align: center;
+    }
+
+    .counter, .duration {
+        background-color: cadetblue;
+        border: 1px solid black;
+        font-size: 1rem;
+        height: 1rem;
+        margin: 0px auto;
+        text-align: center;
+        width: 150px;
+    }
+}
+
+
+#el-01 {
+    grid-area: e01;
+}
+
+#el-02 {
+    grid-area: e02;
+}
+
+#el-03 {
+    grid-area: e03;
+}
+
+#el-04 {
+    grid-area: e04;
+}
+
+#el-05 {
+    grid-area: e05;
+}
+
+#el-06 {
+    grid-area: e06;
+}
+
+#el-07 {
+    grid-area: e07;
+}
+
+#el-08 {
+    grid-area: e08;
+}
+
+#el-09 {
+    grid-area: e09;
+}
+
+#el-10 {
+    grid-area: e10;
+}
+
+#el-11 {
+    grid-area: e11;
+}
+
+#el-12 {
+    grid-area: e12;
+}
+
+#el-13 {
+    grid-area: e13;
+}
+
+#el-14 {
+    grid-area: e14;
+}
+
+#el-15 {
+    grid-area: e15;
+}
+
+#el-16 {
+    grid-area: e16;
+}
