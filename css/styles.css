@@ -32,6 +32,7 @@
   width: var(--piece-size);
   border: 1px dashed red;
   transform: translate(1px, 1px);
+  transition: all 1.5s linear;
 }
 
 .stripe {
