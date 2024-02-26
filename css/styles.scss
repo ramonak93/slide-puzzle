@@ -16,15 +16,14 @@
 
 #box {
     background-color: antiquewhite;
-    box-sizing: content-box;
+    box-sizing: border-box;
     border: 1px solid black;
     display: grid;
     gap: 2px;
     grid-template-columns: repeat(var(--puzzle-size), var(--piece-size));
     grid-template-rows: repeat(var(--puzzle-size), var(--piece-size));
-    margin: 100px auto;
-    transition: all 1s ease;
-    width: calc(var(--piece-size) * var(--puzzle-size) + 2px * (var(--puzzle-size) + 1 ) + 2px);
+    margin: 50px auto;
+    width: calc(var(--piece-size) * var(--puzzle-size) + 2px * (var(--puzzle-size) + 1));
 
     .tile {
         background-color: burlywood;
@@ -38,6 +37,11 @@
         border: 1px dashed red;
         transform: translate(1px, 1px);
         transition: all 1s ease;
+    }
+
+    .tile:empty {
+        background-color: initial;
+        border: initial;
     }
 }
 .stripe {
@@ -65,66 +69,66 @@
 }
 
 
-#el-01 {
-    grid-area: e01;
-}
+// #el-01 {
+//     grid-area: e01;
+// }
 
-#el-02 {
-    grid-area: e02;
-}
+// #el-02 {
+//     grid-area: e02;
+// }
 
-#el-03 {
-    grid-area: e03;
-}
+// #el-03 {
+//     grid-area: e03;
+// }
 
-#el-04 {
-    grid-area: e04;
-}
+// #el-04 {
+//     grid-area: e04;
+// }
 
-#el-05 {
-    grid-area: e05;
-}
+// #el-05 {
+//     grid-area: e05;
+// }
 
-#el-06 {
-    grid-area: e06;
-}
+// #el-06 {
+//     grid-area: e06;
+// }
 
-#el-07 {
-    grid-area: e07;
-}
+// #el-07 {
+//     grid-area: e07;
+// }
 
-#el-08 {
-    grid-area: e08;
-}
+// #el-08 {
+//     grid-area: e08;
+// }
 
-#el-09 {
-    grid-area: e09;
-}
+// #el-09 {
+//     grid-area: e09;
+// }
 
-#el-10 {
-    grid-area: e10;
-}
+// #el-10 {
+//     grid-area: e10;
+// }
 
-#el-11 {
-    grid-area: e11;
-}
+// #el-11 {
+//     grid-area: e11;
+// }
 
-#el-12 {
-    grid-area: e12;
-}
+// #el-12 {
+//     grid-area: e12;
+// }
 
-#el-13 {
-    grid-area: e13;
-}
+// #el-13 {
+//     grid-area: e13;
+// }
 
-#el-14 {
-    grid-area: e14;
-}
+// #el-14 {
+//     grid-area: e14;
+// }
 
-#el-15 {
-    grid-area: e15;
-}
+// #el-15 {
+//     grid-area: e15;
+// }
 
-#el-16 {
-    grid-area: e16;
-}
+// #el-16 {
+//     grid-area: e16;
+// }
