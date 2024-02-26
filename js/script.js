@@ -84,11 +84,12 @@ function moveTile(tile) {
         }
     }
 
+    //TODO
+    // replace alert  with something more decent
     if (isSolved()) {
         timer = 0;
         clearInterval(interval);
         alert("Congratulations! You solved the puzzle!");
-        timer = 0;
     }
 }
 
@@ -120,12 +121,14 @@ function swap (tile) {
     emptyTile.replaceWith(tile);
 }
 
+// compare tile ID and innerText, return TRUE if all match && last tile is empty
 function isSolved() {
     const tiles = Array.from(box.getElementsByClassName("tile"));
     const emptyTile = box.querySelector(".empty-tile");
 
-    return tiles.every((tile) => String(tile.id) == ("el-" + tile.innerText.slice(-2))) 
-                        && (emptyTile.id == ("el-" + formatNumber(puzzleDimension * puzzleDimension)));
+    return tiles.every((tile) => 
+        String(tile.id) == ("el-" + tile.innerText.slice(-2))) 
+        && (emptyTile.id == ("el-" + formatNumber(puzzleDimension * puzzleDimension)));
 }
 
 // update count up timer
