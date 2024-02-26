@@ -1,67 +1,60 @@
 // TODO 
-// change tile movement mechanism (swap row-col VS GridTemplate)
-// Add Success mechanism 
 // filter out unsolvable combinations  https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/
 // replace timer with system timing
 
-// box controls
+// DOM controls
 const btn3 = document.getElementById("btn3");
 const btn4 = document.getElementById("btn4");
 const buttons = [btn3, btn4];
+const counter = document.querySelector(".counter");     // tracks number of puzzle moves
+counter.innerText = 0;
 const minutesLabel = document.querySelector(".minutes");
 const secondsLabel = document.querySelector(".seconds");
 const box = document.querySelector(".box");
-let timer;
+let timer = 0;
+let interval;
 
 // helpers and features
-let isStarted = false;                              // used to trigger counter inside move()
-let counter = document.querySelector(".counter");   // tracks number of puzzle moves
-counter.innerText = 0; 
-let puzzleDimension = 4;                            // default dimension can be changed by buttons
-let tilesArray = [];                                // used to store and manipulate puzzle pieces
+let isStarted = false;                                  // used to trigger counter inside move()
+let puzzleDimension;                                    // dimension can be changed by buttons
+let tilesArray = [];                                    // used to store and manipulate puzzle pieces
 
-// buttons generate new Puzzle
+// generate default Puzzle 4x4
+generatePuzzles(4);
+
+// buttons generate new Puzzle upon click
 for (let b of buttons) {
     b.addEventListener('click', (e) => generatePuzzles(Number(e.target.getAttribute("value"))));
 }
 
-// create layout based on puzzle dimension AND return Array of pieces
+// take puzzle size (int) and append int^2-1 shuffled tiles with click-listener to Box
 function generatePuzzles(dimension) {
+    puzzleDimension = dimension;
     document.documentElement.style.setProperty("--puzzle-size", String(dimension));
+   
     clearBox(box);
-
-    // assign layout based on the chosen dimension
-    // if (dimension == 3) {
-    //     document.getElementById("box").style.gridTemplateAreas = '"e01 e02 e03" "e04 e05 e06" "e07 e08 e09"';
-    // }
-    // if (dimension == 4) {
-    //     document.getElementById("box").style.gridTemplateAreas = 
-    //     '"e01 e02 e03 e04" "e05 e06 e07 e08" "e09 e10 e11 e12" "e13 e14 e15 e16"';
-    // }
-
-    let pieceArr = [];
+    
+    let tilesArray = [];
     for (let i = 0; i < (dimension * dimension - 1); i++) {
         let tile = document.createElement("div");
         tile.className = "tile";
-        tile.textContent = appendZero(i+1);
-        tile.addEventListener("click", (e) => moveTile(e.target, dimension));
-        pieceArr.push(tile);
+        tile.textContent = formatNumber(i + 1);
+        tile.addEventListener("click", (e) => moveTile(e.target));
+        tilesArray.push(tile);
     }
     
-    shufflePieces(pieceArr);
-    
+    shufflePieces(tilesArray);  
 
-    for (let k = 0; k < pieceArr.length; k++) {
-        box.appendChild(pieceArr[k]);
+    for (let k = 0; k < tilesArray.length; k++) {
+        box.appendChild(tilesArray[k]);
     }
 }
 
-// takes Array of divs and randomly assigns ID's to them
+// take array of tiles, assign random ID's and add emptyTile
 function shufflePieces(arr) {
-    // create Array of IDs (String) like 'e01', 'e02', 'e03'...'e99'.
     let idArr = [];
     for (let j = 0; j < arr.length + 1; j ++) {
-        idArr.push("el-" + appendZero(j+1));
+        idArr.push("el-" + formatNumber(j + 1));
     }
 
     // shuffle arr of div's
@@ -69,88 +62,93 @@ function shufflePieces(arr) {
         return 0.5 - Math.random();
     })
 
-    // adding empty tile to the end of Array
+    // add empty tile to the end of Array
     let emptyTile = document.createElement("div");
-    emptyTile.className = "tile";
+    emptyTile.className = "empty-tile";
     arr.push(emptyTile);
 
-    // assign ID's to div's
+    // assign ID's to tiles
     arr.forEach(function (div, index) {
         div.id = idArr[index];
     })  
 }
 
-// move tile if possible
-function moveTile(tile, dimension) {
-    if (canMove(tile, dimension) != null) {
+// move tile if canMove()
+function moveTile(tile) {
+    if (canMove(tile)) {
         swap(tile);
+        counter.textContent++;
+        if (!isStarted) {
+            isStarted = true;
+            startTimer();
+        }
     }
 
     if (isSolved()) {
-        // do smth
+        timer = 0;
+        clearInterval(interval);
+        alert("Congratulations! You solved the puzzle!");
+        timer = 0;
     }
 }
 
-// returns string ID of available adjacent slot (if it exists) or null (if it doesn't exist)
-function canMove(tile, dimension) {
-    let emptyTile = box.querySelector(".tile:empty");
+// returns TRUE if emptyTile is adjacent
+function canMove(tile) {
+    let emptyTile = box.querySelector(".empty-tile");
     let tileId = Number(tile.id.slice(-2));
 
-    let right = document.getElementById("el-" + appendZero(tileId + 1));
-    let left = document.getElementById("el-" + appendZero(tileId - 1));
-    let up = document.getElementById("el-" + appendZero(tileId - dimension));
-    let down = document.getElementById("el-" + appendZero(tileId + dimension));
+    let right = document.getElementById("el-" + formatNumber(tileId + 1));
+    let left = document.getElementById("el-" + formatNumber(tileId - 1));
+    let up = document.getElementById("el-" + formatNumber(tileId - puzzleDimension));
+    let down = document.getElementById("el-" + formatNumber(tileId + puzzleDimension));
     
-    if (
-        (right === emptyTile && tileId % dimension != 0) 
-        || (left === emptyTile && (tileId - 1) % dimension !=0) 
-        || (up === emptyTile && tileId > dimension) 
-        || (down === emptyTile && tileId <= dimension * (dimension - 1))
-        ) {
-        return emptyTile.id;
-    }
-    return null;
+    return ((right === emptyTile && tileId % puzzleDimension != 0) 
+            || (left === emptyTile && (tileId - 1) % puzzleDimension !=0) 
+            || (up === emptyTile && tileId > puzzleDimension) 
+            || (down === emptyTile && tileId <= puzzleDimension * (puzzleDimension - 1))
+    );
 }
 
+// swap tile with emptyTile
 function swap (tile) {
-    let emptyTile = box.querySelector(".tile:empty");
-    let newEmptyTile = document.createElement("div");
-    newEmptyTile.className = "tile";
+    const emptyTile = box.querySelector(".empty-tile");
+    const newEmptyTile = document.createElement("div");
+    newEmptyTile.className = "empty-tile";
     newEmptyTile.id = tile.id;
     emptyTile.parentNode.insertBefore(newEmptyTile, tile);
     tile.id = emptyTile.id;
     emptyTile.replaceWith(tile);
 }
 
-// updates count up timer
+function isSolved() {
+    const tiles = Array.from(box.getElementsByClassName("tile"));
+    const emptyTile = box.querySelector(".empty-tile");
+
+    return tiles.every((tile) => String(tile.id) == ("el-" + tile.innerText.slice(-2))) 
+                        && (emptyTile.id == ("el-" + formatNumber(puzzleDimension * puzzleDimension)));
+}
+
+// update count up timer
 function startTimer() {
-    timer = setInterval(() => {
+    interval = setInterval(() => {
         timer++;
-        updateTimer();        
+        secondsLabel.innerText = formatNumber(parseInt(timer % 1000));
+        minutesLabel.innerText = formatNumber(parseInt(timer / 60));        
     }, 1000)
 }
 
-function updateTimer() {
-    secondsLabel.innerText = appendZero(parseInt(timer % 1000));
-    minutesLabel.innerText = appendZero(parseInt(timer / 60)); 
-}
-
 // used for string formatting so that all ID's have 2 digits at the end
-function appendZero (int) {
+function formatNumber (int) {
     return (int).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
 }
 
-// clear box
-// TODO
-// reset timer
+// reset Box, timer, counter and isStarted
 function clearBox (box) {
+    isStarted = false;
     counter.innerText = 0;
     timer = 0;
-    updateTimer();
-    clearInterval(timer);
+    clearInterval(interval);
+    minutesLabel.textContent = formatNumber(0);
+    secondsLabel.textContent = formatNumber(0);
     box.innerText = '';
 }
-
-
-// main
-generatePuzzles(puzzleDimension);
