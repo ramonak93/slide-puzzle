@@ -77,58 +77,49 @@ function shufflePieces(arr) {
     // assign ID's to div's
     arr.forEach(function (div, index) {
         div.id = idArr[index];
-    })
-
-    
+    })  
 }
 
 // move tile if possible
 function moveTile(tile, dimension) {
-    // if (findDirection(tile, dimension) != null) {         // check if adjacent free slot exists
-    //     tile.id = findDirection(tile, dimension);          // move element to adjacent free slot
-    //     counter.innerText++;
-    //     if (isStarted == false) {
-    //         isStarted = true;
-    //         startTimer();
-    //     }
-    // }
-
-    if (findDirection(tile, dimension) != null) {
-        tile.id = findDirection(tile, dimension);
+    if (canMove(tile, dimension) != null) {
+        swap(tile);
     }
 
     if (isSolved()) {
         // do smth
     }
-
 }
 
 // returns string ID of available adjacent slot (if it exists) or null (if it doesn't exist)
-function findDirection(tile, dimension) {
+function canMove(tile, dimension) {
     let emptyTile = box.querySelector(".tile:empty");
     let tileId = Number(tile.id.slice(-2));
+
     let right = document.getElementById("el-" + appendZero(tileId + 1));
     let left = document.getElementById("el-" + appendZero(tileId - 1));
     let up = document.getElementById("el-" + appendZero(tileId - dimension));
     let down = document.getElementById("el-" + appendZero(tileId + dimension));
     
-    if (right === emptyTile && tileId % dimension != 0) {
+    if (
+        (right === emptyTile && tileId % dimension != 0) 
+        || (left === emptyTile && (tileId - 1) % dimension !=0) 
+        || (up === emptyTile && tileId > dimension) 
+        || (down === emptyTile && tileId <= dimension * (dimension - 1))
+        ) {
         return emptyTile.id;
     }
-
-    if (left == null && (tileId - 1) % dimension !=0) {
-        return String("el-" + appendZero(tileId - 1));
-    }
-
-    if (up == null && tileId > dimension) {
-        return String("el-" + appendZero(tileId - dimension));
-    }
-
-    if (down == null && tileId <= dimension * (dimension - 1)) {
-        return String("el-" + appendZero(tileId + dimension));
-    }
-    
     return null;
+}
+
+function swap (tile) {
+    let emptyTile = box.querySelector(".tile:empty");
+    let newEmptyTile = document.createElement("div");
+    newEmptyTile.className = "tile";
+    newEmptyTile.id = tile.id;
+    emptyTile.parentNode.insertBefore(newEmptyTile, tile);
+    tile.id = emptyTile.id;
+    emptyTile.replaceWith(tile);
 }
 
 // updates count up timer
