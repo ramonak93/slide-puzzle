@@ -1,5 +1,4 @@
 // TODO 
-// filter out unsolvable combinations  https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/
 // replace timer with system timing
 
 // DOM controls
@@ -7,17 +6,15 @@ const btn3 = document.getElementById("btn3");
 const btn4 = document.getElementById("btn4");
 const buttons = [btn3, btn4];
 const counter = document.querySelector(".counter");     // tracks number of puzzle moves
-counter.innerText = 0;
 const minutesLabel = document.querySelector(".minutes");
 const secondsLabel = document.querySelector(".seconds");
 const box = document.querySelector(".box");
-let timer = 0;
-let interval;
 
-// helpers and features
+counter.innerText = 0;
+let interval;
+let timer = 0;                                          // represents intervals (i.e. seconds passed)
 let isStarted = false;                                  // used to trigger counter inside move()
 let puzzleDimension;                                    // dimension can be changed by buttons
-let tilesArray = [];                                    // used to store and manipulate puzzle pieces
 
 // generate default Puzzle 4x4
 generatePuzzles(4);
@@ -57,10 +54,12 @@ function shufflePieces(arr) {
         idArr.push("el-" + formatNumber(j + 1));
     }
 
-    // shuffle arr of div's
-    arr.sort(function () {
-        return 0.5 - Math.random();
-    })
+    // shuffle arr of div's until instance of Puzzle isSolvable()
+    do {
+        arr.sort(function () {
+            return 0.5 - Math.random();
+        })
+    } while (isSolvable(arr) == false);
 
     // add empty tile to the end of Array
     let emptyTile = document.createElement("div");
@@ -71,6 +70,30 @@ function shufflePieces(arr) {
     arr.forEach(function (div, index) {
         div.id = idArr[index];
     })  
+
+    isSolvable(arr);
+}
+
+// Puzzle instance is only solvable if number of inversions needed is even (given empty tile is at the bottom)
+// simpliefied function taken from https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/ 
+function isSolvable(arr) {
+    valueArray = [];
+    arr.forEach((element) => valueArray.push(element.innerText));
+    return (getInversionCount(valueArray) % 2 == 0);
+}
+
+// return num of inversions (NOT swaps!) needed to solve Puzzle
+function getInversionCount(arr) {
+    let swapCounter = 0;
+    for (let i = 0; i < puzzleDimension * puzzleDimension - 1; i++) {
+        for (let j = i+1; j < puzzleDimension * puzzleDimension; j++) {
+            
+            if (arr[j] && arr[i] && arr[i] > arr[j]) {
+                swapCounter++;
+            }
+        }
+    }
+    return swapCounter;
 }
 
 // move tile if canMove()
@@ -111,7 +134,7 @@ function canMove(tile) {
 }
 
 // swap tile with emptyTile
-function swap (tile) {
+function swap(tile) {
     const emptyTile = box.querySelector(".empty-tile");
     const newEmptyTile = document.createElement("div");
     newEmptyTile.className = "empty-tile";
@@ -141,12 +164,12 @@ function startTimer() {
 }
 
 // used for string formatting so that all ID's have 2 digits at the end
-function formatNumber (int) {
+function formatNumber(int) {
     return (int).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
 }
 
 // reset Box, timer, counter and isStarted
-function clearBox (box) {
+function clearBox(box) {
     isStarted = false;
     counter.innerText = 0;
     timer = 0;
