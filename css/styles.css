@@ -38,6 +38,20 @@
   transform: translate(1px, 1px);
   transition: all 1s ease;
 }
+#box .tile-disabled {
+  background-color: burlywood;
+  font-size: 0.6rem;
+  box-sizing: border-box;
+  cursor: initial;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  height: var(--piece-size);
+  width: var(--piece-size);
+  border: 1px dashed red;
+  transform: translate(1px, 1px);
+  transition: all 1s ease;
+}
 #box .empty-tile {
   background-color: initial;
   border: initial;
