@@ -30,12 +30,12 @@ function generatePuzzles(dimension) {
     puzzleDimension = dimension;
     document.documentElement.style.setProperty("--puzzle-size", String(dimension));
    
-    clearBox();
+    resetGame(); // reset Box, timer, counter and isStarted
     
     let tilesArray = [];
     for (let i = 0; i < (dimension * dimension - 1); i++) {
         let tile = document.createElement("div");
-        tile.className = "tile";
+        tile.classList.add("tile");
         tile.textContent = formatNumber(i + 1);
         tile.addEventListener("click", (e) => moveTile(e.target));
         tilesArray.push(tile);
@@ -64,15 +64,13 @@ function shufflePieces(arr) {
 
     // add empty tile to the end of Array
     let emptyTile = document.createElement("div");
-    emptyTile.className = "empty-tile";
+    emptyTile.classList.add("empty-tile");
     arr.push(emptyTile);
 
     // assign ID's to tiles
     arr.forEach(function (div, index) {
         div.id = idArr[index];
     })  
-
-    isSolvable(arr);
 }
 
 // Puzzle instance is only solvable if number of inversions needed is even (given empty tile is at the bottom)
@@ -98,7 +96,7 @@ function getInversionCount(arr) {
     return swapCounter;
 }
 
-// move tile if canMove()
+// move tile if canMove() && !isSoved()
 function moveTile(tile) {
     if (canMove(tile)) {
         swap(tile);
@@ -139,7 +137,7 @@ function canMove(tile) {
 function swap(tile) {
     const emptyTile = box.querySelector(".empty-tile");
     const newEmptyTile = document.createElement("div");
-    newEmptyTile.className = "empty-tile";
+    newEmptyTile.classList.add("empty-tile");
     newEmptyTile.id = tile.id;
     emptyTile.parentNode.insertBefore(newEmptyTile, tile);
     tile.id = emptyTile.id;
@@ -168,7 +166,7 @@ function startTimer() {
 }
 
 // reset Box, timer, counter and isStarted
-function clearBox() {
+function resetGame() {
     isStarted = false;
     counter.innerText = 0;
     timer = 0;
@@ -178,10 +176,12 @@ function clearBox() {
     box.innerText = '';
 }
 
+// remove evenListeners from tiles
 function finishGame() {
     const tileArray = box.childNodes;
     for (let t of tileArray) {
         let newTile = t.cloneNode(true);
+        newTile.className = "tile-disabled";
         t.parentNode.replaceChild(newTile, t);     
     }
 
