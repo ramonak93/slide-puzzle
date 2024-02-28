@@ -12,6 +12,7 @@ const box = document.querySelector(".box");
 
 counter.innerText = 0;
 let interval;
+let startTime;
 let timer = 0;                                          // represents intervals (i.e. seconds passed)
 let isStarted = false;                                  // used to trigger counter inside move()
 let puzzleDimension;                                    // dimension can be changed by buttons
@@ -21,15 +22,15 @@ generatePuzzles(4);
 
 // buttons generate new Puzzle upon click
 for (let b of buttons) {
-    b.addEventListener('click', (e) => generatePuzzles(Number(e.target.getAttribute("value"))));
+    b.addEventListener("click", (e) => generatePuzzles(Number(e.target.getAttribute("value"))));
 }
 
-// take puzzle size (int) and append int^2-1 shuffled tiles with click-listener to Box
+// append puzzleDimension^2 shuffled tiles with click-listener to Box
 function generatePuzzles(dimension) {
     puzzleDimension = dimension;
     document.documentElement.style.setProperty("--puzzle-size", String(dimension));
    
-    clearBox(box);
+    clearBox();
     
     let tilesArray = [];
     for (let i = 0; i < (dimension * dimension - 1); i++) {
@@ -47,7 +48,7 @@ function generatePuzzles(dimension) {
     }
 }
 
-// take array of tiles, assign random ID's and add emptyTile
+// shuffle until isSolvable(), assign random ID's and add emptyTile to Array of tile div's
 function shufflePieces(arr) {
     let idArr = [];
     for (let j = 0; j < arr.length + 1; j ++) {
@@ -75,7 +76,8 @@ function shufflePieces(arr) {
 }
 
 // Puzzle instance is only solvable if number of inversions needed is even (given empty tile is at the bottom)
-// simpliefied function taken from https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/ 
+// in this Puzzle emptyTile is always at the bottom 
+// taken from https://www.geeksforgeeks.org/check-instance-15-puzzle-solvable/ 
 function isSolvable(arr) {
     valueArray = [];
     arr.forEach((element) => valueArray.push(element.innerText));
@@ -110,9 +112,9 @@ function moveTile(tile) {
     //TODO
     // replace alert  with something more decent
     if (isSolved()) {
-        timer = 0;
         clearInterval(interval);
         alert("Congratulations! You solved the puzzle!");
+        finishGame();
     }
 }
 
@@ -154,22 +156,19 @@ function isSolved() {
         && (emptyTile.id == ("el-" + formatNumber(puzzleDimension * puzzleDimension)));
 }
 
-// update count up timer
+// start count up timer with 1000ms interval
 function startTimer() {
+    startTime = Date.now();
     interval = setInterval(() => {
-        timer++;
-        secondsLabel.innerText = formatNumber(parseInt(timer % 1000));
-        minutesLabel.innerText = formatNumber(parseInt(timer / 60));        
-    }, 1000)
-}
-
-// used for string formatting so that all ID's have 2 digits at the end
-function formatNumber(int) {
-    return (int).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping:false});
+        const currentTime = Date.now();
+        const passedTime = Math.floor((currentTime - startTime) / 1000);
+        secondsLabel.innerText = formatNumber(passedTime % 60);
+        minutesLabel.innerText = formatNumber(parseInt(passedTime / 60)); 
+    }, 1000);
 }
 
 // reset Box, timer, counter and isStarted
-function clearBox(box) {
+function clearBox() {
     isStarted = false;
     counter.innerText = 0;
     timer = 0;
@@ -177,4 +176,18 @@ function clearBox(box) {
     minutesLabel.textContent = formatNumber(0);
     secondsLabel.textContent = formatNumber(0);
     box.innerText = '';
+}
+
+function finishGame() {
+    const tileArray = box.childNodes;
+    for (let t of tileArray) {
+        let newTile = t.cloneNode(true);
+        t.parentNode.replaceChild(newTile, t);     
+    }
+
+}
+
+// used for string formatting so that all numbers have 2 digits 
+function formatNumber(int) {
+    return (int).toLocaleString('en-US', {minimumIntegerDigits: 2, useGrouping: false});
 }
